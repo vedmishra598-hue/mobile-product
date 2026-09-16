@@ -31,8 +31,9 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image + Favorite Button Overlay
+            // Proportional Image Container
             Expanded(
+              flex: 5,
               child: Stack(
                 children: [
                   Positioned.fill(
@@ -41,7 +42,7 @@ class ProductCard extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
                         color: theme.colorScheme.surfaceContainerHighest,
-                        child: const Icon(Icons.broken_image, size: 40),
+                        child: const Icon(Icons.broken_image, size: 36),
                       ),
                       loadingBuilder: (context, child, progress) {
                         if (progress == null) return child;
@@ -59,7 +60,7 @@ class ProductCard extends StatelessWidget {
                     right: 6,
                     child: CircleAvatar(
                       radius: 16,
-                      backgroundColor: Colors.black45,
+                      backgroundColor: Colors.black54,
                       child: IconButton(
                         padding: EdgeInsets.zero,
                         iconSize: 18,
@@ -68,7 +69,7 @@ class ProductCard extends StatelessWidget {
                           color: isFavorite ? Colors.redAccent : Colors.white,
                         ),
                         onPressed: () {
-                          favoritesProvider.toggleFavorite(product.id);
+                          favoritesProvider.toggleFavorite(product);
                         },
                       ),
                     ),
@@ -77,80 +78,87 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // Product Details
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
+            // Flexible Product Details (Zero overflow guarantee)
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
                       ),
-                      Row(
-                        children: [
-                          const Icon(Icons.star, size: 14, color: Colors.amber),
-                          const SizedBox(width: 2),
-                          Text(
-                            product.rating.toStringAsFixed(1),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            '\$${product.price.toStringAsFixed(2)}',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 32,
-                    child: FilledButton.tonal(
-                      onPressed: () {
-                        cartProvider.addToCart(product);
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${product.title} added to cart!'),
-                            duration: const Duration(seconds: 1),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
-                      style: FilledButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        backgroundColor: inCart
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.secondaryContainer,
-                        foregroundColor: inCart
-                            ? theme.colorScheme.onPrimary
-                            : theme.colorScheme.onSecondaryContainer,
-                      ),
-                      child: Text(
-                        inCart ? 'Added' : 'Add to Cart',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(width: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.star, size: 13, color: Colors.amber),
+                            const SizedBox(width: 2),
+                            Text(
+                              product.rating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 30,
+                      child: FilledButton.tonal(
+                        onPressed: () {
+                          cartProvider.addToCart(product);
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${product.title} added to cart!'),
+                              duration: const Duration(seconds: 1),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        style: FilledButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: inCart
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.secondaryContainer,
+                          foregroundColor: inCart
+                              ? theme.colorScheme.onPrimary
+                              : theme.colorScheme.onSecondaryContainer,
+                        ),
+                        child: Text(
+                          inCart ? 'Added' : 'Add to Cart',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

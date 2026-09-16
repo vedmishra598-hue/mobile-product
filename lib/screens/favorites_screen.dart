@@ -1,21 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/favorites_provider.dart';
-import '../providers/products_provider.dart';
 import '../widgets/product_card.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
 
+  int _calculateCrossAxisCount(double width) {
+    if (width > 1250) return 5;
+    if (width > 950) return 4;
+    if (width > 650) return 3;
+    if (width > 360) return 2;
+    return 1;
+  }
+
+  double _calculateAspectRatio(double width) {
+    if (width > 1250) return 0.76;
+    if (width > 950) return 0.74;
+    if (width > 650) return 0.72;
+    if (width > 360) return 0.69;
+    return 1.1;
+  }
+
   @override
   Widget build(BuildContext context) {
     final favoritesProvider = context.watch<FavoritesProvider>();
-    final productsProvider = context.watch<ProductsProvider>();
     final theme = Theme.of(context);
-
-    final favoriteProducts = productsProvider.products
-        .where((p) => favoritesProvider.isFavorite(p.id))
-        .toList();
+    final favoriteProducts = favoritesProvider.favoriteProducts;
 
     return Scaffold(
       appBar: AppBar(
@@ -51,36 +62,40 @@ class FavoritesScreen extends StatelessWidget {
                 ],
               ),
             )
-          : LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide = constraints.maxWidth > 900;
-                final isMedium = constraints.maxWidth > 600;
-                final crossAxisCount = isWide ? 4 : (isMedium ? 3 : 2);
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
+                    final childAspectRatio = _calculateAspectRatio(constraints.maxWidth);
 
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.72,
-                  ),
-                  itemCount: favoriteProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = favoriteProducts[index];
-                    return ProductCard(
-                      product: product,
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/details',
-                          arguments: product,
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: childAspectRatio,
+                      ),
+                      itemCount: favoriteProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = favoriteProducts[index];
+                        return ProductCard(
+                          product: product,
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/details',
+                              arguments: product,
+                            );
+                          },
                         );
                       },
                     );
                   },
-                );
-              },
+                ),
+              ),
             ),
     );
   }

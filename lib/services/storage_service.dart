@@ -59,6 +59,24 @@ class StorageService {
     await _favoritesBox.put('favorite_ids', ids.toList());
   }
 
+  static List<Product> getFavoriteProducts() {
+    final raw = _favoritesBox.get('favorite_products');
+    if (raw == null) return [];
+    try {
+      final list = List<String>.from(raw as List);
+      return list
+          .map((item) => Product.fromJson(jsonDecode(item) as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static Future<void> saveFavoriteProducts(List<Product> products) async {
+    final list = products.map((p) => jsonEncode(p.toJson())).toList();
+    await _favoritesBox.put('favorite_products', list);
+  }
+
   // --- Cart Persistence ---
   static Box get _cartBox => Hive.box(cartBoxName);
 
