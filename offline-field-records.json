@@ -1,0 +1,10 @@
+// Supplied source data is intentionally kept as a reference.
+// Original filename: offline-field-records (4)(1).json
+{
+  "records": [
+    { "id": "FR-001", "title": "Campus survey", "updatedAt": "2026-08-01T09:30:00Z", "syncState": "synced", "version": 1 },
+    { "id": "FR-002", "title": "Library inspection", "updatedAt": "2026-08-02T11:15:00Z", "syncState": "pending", "version": 2 },
+    { "id": "FR-003", "title": "Lab inventory", "updatedAt": "2026-08-02T11:18:00Z", "syncState": "conflict", "version": 3 }
+  ],
+  "expected_behaviour": "Persist edits offline, expose sync state, and resolve version conflicts without silent data loss."
+}
