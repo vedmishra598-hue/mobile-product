@@ -1,72 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'screens/onboarding_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/details_screen.dart';
-import 'screens/profile_screen.dart';
+import 'models/product.dart';
+import 'services/storage_service.dart';
+import 'providers/theme_provider.dart';
+import 'providers/auth_provider.dart';
+import 'providers/cart_provider.dart';
+import 'providers/favorites_provider.dart';
+import 'providers/products_provider.dart';
 import 'theme/app_theme.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'screens/home_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/details_screen.dart';
+import 'screens/cart_screen.dart';
+import 'screens/favorites_screen.dart';
+import 'screens/profile_screen.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await StorageService.init();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+        ChangeNotifierProvider(create: (_) => ProductsProvider()),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  bool isDarkMode = false;
-
-  void toggleTheme() {
-    setState(() {
-      isDarkMode = !isDarkMode;
-    });
-  }
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Responsive Mobile UI',
-
+      title: 'Store & Catalog Capstone',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-
-      initialRoute: '/',
-
+      themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      initialRoute: '/home',
       routes: {
-        '/': (context) => const OnboardingScreen(),
-        '/home': (context) => HomeScreen(
-              isDarkMode: isDarkMode,
-              onThemeChanged: toggleTheme,
-            ),
-        '/profile': (context) => ProfileScreen(
-              isDarkMode: isDarkMode,
-              onThemeChanged: toggleTheme,
-            ),
+        '/home': (context) => const HomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/cart': (context) => const CartScreen(),
+        '/favorites': (context) => const FavoritesScreen(),
+        '/profile': (context) => const ProfileScreen(),
       },
-
       onGenerateRoute: (settings) {
         if (settings.name == '/details') {
-          final item = settings.arguments as String;
-
-          return PageRouteBuilder(
-            pageBuilder: (_, animation, __) {
-              return DetailsScreen(itemName: item);
-            },
-            transitionsBuilder: (_, animation, __, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
+          final product = settings.arguments as Product;
+          return MaterialPageRoute(
+            builder: (_) => DetailsScreen(product: product),
           );
         }
-
         return null;
       },
     );
